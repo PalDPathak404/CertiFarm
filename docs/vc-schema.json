@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CertiFarm Digital Product Passport",
+  "description": "W3C Verifiable Credential schema for agricultural product quality certification",
+  "type": "object",
+  "required": ["@context", "id", "type", "issuer", "issuanceDate", "credentialSubject"],
+  "properties": {
+    "@context": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "https://www.w3.org/2018/credentials/v1" }
+    },
+    "id": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "type": {
+      "type": "array",
+      "contains": { "const": "VerifiableCredential" },
+      "items": { "type": "string" }
+    },
+    "issuer": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^did:" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "default": "QualityAssuranceAgency" },
+        "certificationNumber": { "type": "string" }
+      }
+    },
+    "issuanceDate": { "type": "string", "format": "date-time" },
+    "expirationDate": { "type": "string", "format": "date-time" },
+    "credentialSubject": {
+      "type": "object",
+      "required": ["id", "product", "qualityCertification"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^did:" },
+        "type": { "const": "AgriculturalProduct" },
+        "product": {
+          "type": "object",
+          "required": ["name", "category", "batchId"],
+          "properties": {
+            "name": { "type": "string" },
+            "category": {
+              "type": "string",
+              "enum": ["rice", "wheat", "spices", "pulses", "oilseeds", "fruits", "vegetables", "tea", "coffee", "other"]
+            },
+            "variety": { "type": "string" },
+            "quantity": { "type": "string" },
+            "batchId": { "type": "string", "pattern": "^CF-" },
+            "harvestDate": { "type": ["string", "null"], "format": "date-time" },
+            "packagingDate": { "type": ["string", "null"], "format": "date-time" }
+          }
+        },
+        "origin": {
+          "type": "object",
+          "properties": {
+            "country": { "type": "string" },
+            "state": { "type": "string" },
+            "district": { "type": "string" },
+            "farmLocation": { "type": "string" },
+            "geoCoordinates": {
+              "type": ["object", "null"],
+              "properties": {
+                "latitude": { "type": "number" },
+                "longitude": { "type": "number" }
+              }
+            }
+          }
+        },
+        "destination": {
+          "type": "object",
+          "properties": {
+            "country": { "type": "string" },
+            "port": { "type": "string" },
+            "importerName": { "type": "string" }
+          }
+        },
+        "qualityCertification": {
+          "type": "object",
+          "required": ["overallResult", "inspectionDate"],
+          "properties": {
+            "inspectionId": { "type": "string" },
+            "inspectionDate": { "type": "string", "format": "date-time" },
+            "inspectionType": { "type": "string", "enum": ["physical", "virtual", "lab_based"] },
+            "grade": { "type": "string", "enum": ["A", "B", "C", "D", "Rejected"] },
+            "overallResult": { "type": "string", "enum": ["pass", "fail", "conditional_pass"] },
+            "qualityParameters": {
+              "type": "object",
+              "properties": {
+                "moistureContent": { "type": "string" },
+                "foreignMatter": { "type": "string" },
+                "pesticideStatus": { "type": "string" },
+                "aflatoxinLevel": { "type": "string" },
+                "organicCertified": { "type": "boolean" }
+              }
+            },
+            "compliance": {
+              "type": "object",
+              "properties": {
+                "fssaiCompliant": { "type": "boolean" },
+                "exportStandards": { "type": "boolean" },
+                "destinationCountryStandards": { "type": "boolean" },
+                "isoCompliant": { "type": "boolean" },
+                "isoCodes": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "required": ["type", "created", "proofPurpose", "proofValue"],
+      "properties": {
+        "type": { "type": "string", "default": "Ed25519Signature2020" },
+        "created": { "type": "string", "format": "date-time" },
+        "verificationMethod": { "type": "string" },
+        "proofPurpose": { "const": "assertionMethod" },
+        "proofValue": { "type": "string" }
+      }
+    }
+  }
+}
