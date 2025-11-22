@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// API Base URL - use environment variable or default to localhost
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
@@ -8,6 +9,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor to add auth token
@@ -19,18 +21,31 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    
+    // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Only redirect if not already on login page and not verifying
+      const isLoginPage = window.location.pathname === '/login';
+      const isVerifyPage = window.location.pathname.startsWith('/verify');
+      
+      if (!isLoginPage && !isVerifyPage) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
+    
     return Promise.reject(error);
   }
 );
@@ -67,7 +82,10 @@ export const inspectionAPI = {
 // Credential APIs
 export const credentialAPI = {
   issue: (batchId) => api.post(`/credentials/issue/${batchId}`),
-  verify: (credentialId) => api.get(`/credentials/verify/${credentialId}`),
+  verify: (credentialId) => {
+    // Create a new axios instance without auth for public verification
+    return axios.get(`${API_URL}/credentials/verify/${credentialId}`);
+  },
   getByBatch: (batchId) => api.get(`/credentials/batch/${batchId}`),
   revoke: (id, reason) => api.put(`/credentials/${id}/revoke`, { reason }),
   getAll: (params) => api.get('/credentials', { params }),

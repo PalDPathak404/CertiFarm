@@ -8,7 +8,7 @@ import {
 } from 'react-icons/fi';
 
 const StatCard = ({ icon: Icon, label, value, color, link }) => (
-  <Link to={link} className="card-hover flex items-center gap-4">
+  <Link to={link} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow flex items-center gap-4">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
       <Icon className="w-6 h-6 text-white" />
     </div>
@@ -41,10 +41,10 @@ const QADashboard = ({ stats }) => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      submitted: 'badge-info',
-      under_inspection: 'badge-warning',
+      submitted: 'bg-blue-100 text-blue-800',
+      under_inspection: 'bg-yellow-100 text-yellow-800',
     };
-    return styles[status] || 'badge-gray';
+    return styles[status] || 'bg-gray-100 text-gray-800';
   };
 
   const formatStatus = (status) => {
@@ -52,9 +52,9 @@ const QADashboard = ({ stats }) => {
   };
 
   const getPriorityBadge = (priority) => {
-    if (priority === 'urgent') return 'badge-error';
-    if (priority === 'express') return 'badge-warning';
-    return 'badge-gray';
+    if (priority === 'urgent') return 'bg-red-100 text-red-800';
+    if (priority === 'express') return 'bg-orange-100 text-orange-800';
+    return 'bg-gray-100 text-gray-800';
   };
 
   const statusCounts = stats?.statusBreakdown?.reduce((acc, item) => {
@@ -63,11 +63,11 @@ const QADashboard = ({ stats }) => {
   }, {}) || {};
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome, {user?.name?.split(' ')[0]}!
+          Welcome, {user?.name?.split(' ')[0] || 'User'}!
         </h1>
         <p className="text-gray-600">QA Agency Dashboard - Manage inspections and certifications</p>
       </div>
@@ -106,7 +106,7 @@ const QADashboard = ({ stats }) => {
 
       {/* Urgent Items Alert */}
       {pendingBatches.some(b => b.priority === 'urgent') && (
-        <div className="card bg-red-50 border border-red-200">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <FiAlertCircle className="w-6 h-6 text-red-600" />
             <div>
@@ -115,7 +115,7 @@ const QADashboard = ({ stats }) => {
                 You have {pendingBatches.filter(b => b.priority === 'urgent').length} urgent inspection(s) awaiting action
               </p>
             </div>
-            <Link to="/dashboard/pending" className="btn btn-danger ml-auto">
+            <Link to="/dashboard/pending" className="ml-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
               View Now
             </Link>
           </div>
@@ -123,17 +123,17 @@ const QADashboard = ({ stats }) => {
       )}
 
       {/* Pending Inspections Table */}
-      <div className="card">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Pending Inspections</h2>
-          <Link to="/dashboard/pending" className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1">
+          <Link to="/dashboard/pending" className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1">
             View All <FiArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
           </div>
         ) : pendingBatches.length === 0 ? (
           <div className="text-center py-8">
@@ -157,9 +157,9 @@ const QADashboard = ({ stats }) => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {pendingBatches.slice(0, 5).map((batch) => (
-                  <tr key={batch._id} className="hover:bg-gray-50">
+                  <tr key={batch._id} className={`hover:bg-gray-50 ${batch.priority === 'urgent' ? 'bg-red-50' : ''}`}>
                     <td className="py-3">
-                      <span className="font-mono text-sm font-medium text-primary-600">
+                      <span className="font-mono text-sm font-medium text-green-600">
                         {batch.batchId}
                       </span>
                     </td>
@@ -168,16 +168,16 @@ const QADashboard = ({ stats }) => {
                       <p className="text-sm text-gray-500 capitalize">{batch.product?.category}</p>
                     </td>
                     <td className="py-3">
-                      <p className="text-gray-900">{batch.exporter?.name}</p>
-                      <p className="text-sm text-gray-500">{batch.exporter?.organization}</p>
+                      <p className="text-gray-900">{batch.exporter?.name || 'N/A'}</p>
+                      <p className="text-sm text-gray-500">{batch.exporter?.organization || ''}</p>
                     </td>
                     <td className="py-3">
-                      <span className={`badge ${getPriorityBadge(batch.priority)}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityBadge(batch.priority)}`}>
                         {batch.priority?.charAt(0).toUpperCase() + batch.priority?.slice(1)}
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className={`badge ${getStatusBadge(batch.status)}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(batch.status)}`}>
                         {formatStatus(batch.status)}
                       </span>
                     </td>
@@ -187,7 +187,7 @@ const QADashboard = ({ stats }) => {
                     <td className="py-3 text-right">
                       <Link
                         to={`/dashboard/inspect/${batch._id}`}
-                        className="btn btn-primary text-sm"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
                       >
                         {batch.status === 'submitted' ? 'Start' : 'Continue'}
                       </Link>

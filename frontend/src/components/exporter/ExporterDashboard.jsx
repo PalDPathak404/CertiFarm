@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FiPackage, FiClock, FiCheckCircle, FiAward, FiPlus, FiArrowRight } from 'react-icons/fi';
 
 const StatCard = ({ icon: Icon, label, value, color, link }) => (
-  <Link to={link} className="card-hover flex items-center gap-4">
+  <Link to={link} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow flex items-center gap-4">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
       <Icon className="w-6 h-6 text-white" />
     </div>
@@ -28,7 +28,7 @@ const ExporterDashboard = ({ stats }) => {
   const fetchRecentBatches = async () => {
     try {
       const response = await batchAPI.getAll({ limit: 5 });
-      setRecentBatches(response.data.data.batches);
+      setRecentBatches(response.data.data.batches || []);
     } catch (error) {
       console.error('Failed to fetch batches:', error);
     } finally {
@@ -38,14 +38,14 @@ const ExporterDashboard = ({ stats }) => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      submitted: 'badge-info',
-      under_inspection: 'badge-warning',
-      inspection_complete: 'badge-info',
-      certified: 'badge-success',
-      rejected: 'badge-error',
-      revoked: 'badge-error',
+      submitted: 'bg-blue-100 text-blue-800',
+      under_inspection: 'bg-yellow-100 text-yellow-800',
+      inspection_complete: 'bg-indigo-100 text-indigo-800',
+      certified: 'bg-green-100 text-green-800',
+      rejected: 'bg-red-100 text-red-800',
+      revoked: 'bg-red-100 text-red-800',
     };
-    return styles[status] || 'badge-gray';
+    return styles[status] || 'bg-gray-100 text-gray-800';
   };
 
   const formatStatus = (status) => {
@@ -58,11 +58,11 @@ const ExporterDashboard = ({ stats }) => {
   }, {}) || {};
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {user?.name?.split(' ')[0]}!
+          Welcome back, {user?.name?.split(' ')[0] || 'User'}!
         </h1>
         <p className="text-gray-600">Here's an overview of your export activities</p>
       </div>
@@ -100,15 +100,15 @@ const ExporterDashboard = ({ stats }) => {
       </div>
 
       {/* Quick Actions */}
-      <div className="card">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             to="/dashboard/batches/new"
-            className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors"
+            className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors"
           >
-            <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-              <FiPlus className="w-5 h-5 text-primary-600" />
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <FiPlus className="w-5 h-5 text-green-600" />
             </div>
             <div>
               <p className="font-medium text-gray-900">New Batch</p>
@@ -117,7 +117,7 @@ const ExporterDashboard = ({ stats }) => {
           </Link>
           <Link
             to="/dashboard/credentials"
-            className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors"
+            className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors"
           >
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <FiAward className="w-5 h-5 text-green-600" />
@@ -129,7 +129,7 @@ const ExporterDashboard = ({ stats }) => {
           </Link>
           <Link
             to="/verify"
-            className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors"
+            className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors"
           >
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <FiCheckCircle className="w-5 h-5 text-blue-600" />
@@ -143,23 +143,23 @@ const ExporterDashboard = ({ stats }) => {
       </div>
 
       {/* Recent Batches */}
-      <div className="card">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Recent Batches</h2>
-          <Link to="/dashboard/batches" className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1">
+          <Link to="/dashboard/batches" className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1">
             View All <FiArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
           </div>
         ) : recentBatches.length === 0 ? (
           <div className="text-center py-8">
             <FiPackage className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No batches yet</p>
-            <Link to="/dashboard/batches/new" className="btn btn-primary mt-4 inline-flex items-center gap-2">
+            <Link to="/dashboard/batches/new" className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
               <FiPlus /> Create First Batch
             </Link>
           </div>
@@ -179,7 +179,7 @@ const ExporterDashboard = ({ stats }) => {
                 {recentBatches.map((batch) => (
                   <tr key={batch._id} className="hover:bg-gray-50">
                     <td className="py-3">
-                      <Link to={`/dashboard/batches/${batch._id}`} className="font-medium text-primary-600 hover:text-primary-700">
+                      <Link to={`/dashboard/batches/${batch._id}`} className="font-medium text-green-600 hover:text-green-700">
                         {batch.batchId}
                       </Link>
                     </td>
@@ -189,7 +189,7 @@ const ExporterDashboard = ({ stats }) => {
                     </td>
                     <td className="py-3 text-gray-600">{batch.destination?.country}</td>
                     <td className="py-3">
-                      <span className={`badge ${getStatusBadge(batch.status)}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(batch.status)}`}>
                         {formatStatus(batch.status)}
                       </span>
                     </td>

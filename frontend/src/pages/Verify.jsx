@@ -4,10 +4,12 @@ import { credentialAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   FiCheckCircle, FiXCircle, FiAlertCircle, FiSearch, 
-  FiLeaf, FiPackage, FiMapPin, FiCalendar, FiAward,
-  FiCamera, FiArrowLeft
+  FiBox, FiPackage, FiMapPin, FiCalendar, FiAward,
+  FiCamera, FiX
 } from 'react-icons/fi';
-import QRScanner from '../components/verifier/QRScanner';
+
+// Lazy load QR Scanner to prevent errors if library fails
+const QRScanner = React.lazy(() => import('../components/verifier/QRScanner'));
 
 const Verify = () => {
   const { credentialId: urlCredentialId } = useParams();
@@ -40,7 +42,7 @@ const Verify = () => {
       setResult({
         success: false,
         verified: false,
-        message: error.response?.data?.message || 'Verification failed'
+        message: error.response?.data?.message || 'Verification failed. Please check the credential ID.'
       });
     } finally {
       setLoading(false);
@@ -55,12 +57,10 @@ const Verify = () => {
         setCredentialId(parsed.id);
         handleVerify(parsed.id);
       } else if (parsed.i) {
-        // Compact format
         setCredentialId(parsed.i);
         handleVerify(parsed.i);
       }
     } catch {
-      // Assume it's a direct credential ID
       setCredentialId(data);
       handleVerify(data);
     }
@@ -80,17 +80,20 @@ const Verify = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <FiLeaf className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+              <FiBox className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg">CertiFarm</span>
           </Link>
-          <Link to="/login" className="btn btn-outline text-sm">
+          <Link 
+            to="/login" 
+            className="px-4 py-2 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 font-medium text-sm"
+          >
             Sign In
           </Link>
         </div>
@@ -108,7 +111,7 @@ const Verify = () => {
         </div>
 
         {/* Search Box */}
-        <div className="card mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -118,19 +121,19 @@ const Verify = () => {
                 onChange={(e) => setCredentialId(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
                 placeholder="Enter Credential ID or scan QR code"
-                className="input pl-10"
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
             <button
               onClick={() => setShowScanner(true)}
-              className="btn btn-secondary flex items-center gap-2"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 flex items-center justify-center gap-2"
             >
               <FiCamera /> Scan QR
             </button>
             <button
               onClick={() => handleVerify()}
               disabled={loading}
-              className="btn btn-primary flex items-center gap-2"
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
@@ -149,23 +152,30 @@ const Verify = () => {
             <div className="bg-white rounded-xl max-w-md w-full p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Scan QR Code</h3>
-                <button onClick={() => setShowScanner(false)}>
-                  <FiXCircle className="w-6 h-6 text-gray-500" />
+                <button onClick={() => setShowScanner(false)} className="p-1 hover:bg-gray-100 rounded">
+                  <FiX className="w-6 h-6 text-gray-500" />
                 </button>
               </div>
-              <QRScanner onScan={handleScanResult} onClose={() => setShowScanner(false)} />
+              <React.Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-500">Loading scanner...</p>
+                </div>
+              }>
+                <QRScanner onScan={handleScanResult} onClose={() => setShowScanner(false)} />
+              </React.Suspense>
             </div>
           </div>
         )}
 
         {/* Result Display */}
         {result && (
-          <div className={`card border-2 ${getStatusColor()} animate-fade-in`}>
+          <div className={`bg-white rounded-xl shadow-sm border-2 p-6 ${getStatusColor()}`}>
             {/* Status Header */}
             <div className="text-center pb-6 border-b border-gray-200">
               {getStatusIcon()}
               <h2 className={`text-2xl font-bold mt-4 ${result.verified ? 'text-green-700' : 'text-red-700'}`}>
-                {result.verified ? 'Certificate Verified' : 'Verification Failed'}
+                {result.verified ? 'Certificate Verified ✓' : 'Verification Failed ✗'}
               </h2>
               <p className="text-gray-600 mt-1">
                 {result.verified 
@@ -185,32 +195,35 @@ const Verify = () => {
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-start gap-3">
-                      <FiPackage className="w-5 h-5 text-primary-600 mt-0.5" />
+                      <FiPackage className="w-5 h-5 text-green-600 mt-0.5" />
                       <div>
                         <p className="text-sm text-gray-500">Product</p>
-                        <p className="font-medium">{result.data.product?.name}</p>
+                        <p className="font-medium">{result.data.product?.name || 'N/A'}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <FiAward className="w-5 h-5 text-primary-600 mt-0.5" />
+                      <FiAward className="w-5 h-5 text-green-600 mt-0.5" />
                       <div>
                         <p className="text-sm text-gray-500">Grade</p>
                         <p className="font-medium">{result.data.qualityCertification?.grade || 'A'}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <FiMapPin className="w-5 h-5 text-primary-600 mt-0.5" />
+                      <FiMapPin className="w-5 h-5 text-green-600 mt-0.5" />
                       <div>
                         <p className="text-sm text-gray-500">Origin</p>
-                        <p className="font-medium">{result.data.origin?.country}</p>
+                        <p className="font-medium">{result.data.origin?.country || 'India'}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <FiCalendar className="w-5 h-5 text-primary-600 mt-0.5" />
+                      <FiCalendar className="w-5 h-5 text-green-600 mt-0.5" />
                       <div>
                         <p className="text-sm text-gray-500">Issued</p>
                         <p className="font-medium">
-                          {new Date(result.data.credential?.issuedAt).toLocaleDateString()}
+                          {result.data.credential?.issuedAt 
+                            ? new Date(result.data.credential.issuedAt).toLocaleDateString()
+                            : 'N/A'
+                          }
                         </p>
                       </div>
                     </div>
@@ -225,7 +238,7 @@ const Verify = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-gray-50 rounded-lg p-3 text-center">
                       <p className="text-xs text-gray-500">Moisture</p>
-                      <p className="font-semibold text-primary-700">
+                      <p className="font-semibold text-green-700">
                         {result.data.qualityCertification?.qualityParameters?.moistureContent || '< 14%'}
                       </p>
                     </div>
@@ -255,8 +268,8 @@ const Verify = () => {
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     Issued By
                   </h3>
-                  <p className="font-medium">{result.data.issuer?.name}</p>
-                  <p className="text-sm text-gray-500">{result.data.issuer?.id}</p>
+                  <p className="font-medium">{result.data.issuer?.name || 'CertiFarm QA Agency'}</p>
+                  <p className="text-sm text-gray-500">{result.data.issuer?.id || ''}</p>
                 </div>
 
                 {/* Verification Count */}
@@ -270,7 +283,7 @@ const Verify = () => {
 
         {/* Info Box */}
         {!result && (
-          <div className="card bg-blue-50 border border-blue-200">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex gap-3">
               <FiAlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>

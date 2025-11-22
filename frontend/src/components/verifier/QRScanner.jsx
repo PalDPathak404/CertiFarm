@@ -1,96 +1,104 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
 import { FiCamera, FiAlertCircle } from 'react-icons/fi';
 
 const QRScanner = ({ onScan, onClose }) => {
-  const scannerRef = useRef(null);
   const [error, setError] = useState(null);
-  const [isScanning, setIsScanning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const scannerRef = useRef(null);
+  const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      "qr-reader",
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        showTorchButtonIfSupported: true,
-        showZoomSliderIfSupported: true,
-      },
-      false
-    );
+    let isMounted = true;
 
-    scanner.render(
-      (decodedText) => {
-        // Success callback
-        scanner.clear();
-        onScan(decodedText);
-      },
-      (errorMessage) => {
-        // Error callback (ignore scan errors, only show permission errors)
-        if (errorMessage.includes('NotAllowedError') || errorMessage.includes('permission')) {
-          setError('Camera access denied. Please allow camera access to scan QR codes.');
+    const initScanner = async () => {
+      try {
+        // Dynamically import html5-qrcode
+        const { Html5QrcodeScanner } = await import('html5-qrcode');
+        
+        if (!isMounted) return;
+
+        const scanner = new Html5QrcodeScanner(
+          "qr-reader",
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+          },
+          false
+        );
+
+        html5QrCodeRef.current = scanner;
+
+        scanner.render(
+          (decodedText) => {
+            // Success callback
+            if (isMounted) {
+              scanner.clear().catch(console.error);
+              onScan(decodedText);
+            }
+          },
+          (errorMessage) => {
+            // Error callback - only show permission errors
+            if (errorMessage.includes('NotAllowedError') || errorMessage.includes('permission')) {
+              if (isMounted) {
+                setError('Camera access denied. Please allow camera access to scan QR codes.');
+              }
+            }
+          }
+        );
+
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to initialize QR scanner:', err);
+        if (isMounted) {
+          setError('Failed to initialize camera. Please try again or enter the credential ID manually.');
+          setIsLoading(false);
         }
       }
-    );
+    };
 
-    scannerRef.current = scanner;
-    setIsScanning(true);
+    initScanner();
 
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+      isMounted = false;
+      if (html5QrCodeRef.current) {
+        html5QrCodeRef.current.clear().catch(console.error);
       }
     };
   }, [onScan]);
 
+  if (isLoading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-gray-500">Initializing camera...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <FiAlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+        <p className="text-red-600 mb-4">{error}</p>
+        <button 
+          onClick={onClose} 
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="qr-scanner-container">
-      {error ? (
-        <div className="text-center py-8">
-          <FiAlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-          <p className="text-red-600 mb-4">{error}</p>
-          <button onClick={onClose} className="btn btn-secondary">
-            Close
-          </button>
-        </div>
-      ) : (
-        <>
-          <div id="qr-reader" className="rounded-lg overflow-hidden"></div>
-          <p className="text-sm text-gray-500 text-center mt-4">
-            Point your camera at the QR code on the certificate
-          </p>
-        </>
-      )}
-      
-      <style jsx>{`
-        #qr-reader {
-          width: 100%;
-          border: none !important;
-        }
-        #qr-reader video {
-          border-radius: 8px;
-        }
-        #qr-reader__scan_region {
-          background: transparent !important;
-        }
-        #qr-reader__dashboard {
-          padding: 10px 0 !important;
-        }
-        #qr-reader__dashboard button {
-          padding: 8px 16px !important;
-          border-radius: 8px !important;
-          background: #22c55e !important;
-          color: white !important;
-          border: none !important;
-          cursor: pointer !important;
-        }
-        #qr-reader__dashboard select {
-          padding: 8px !important;
-          border-radius: 8px !important;
-          border: 1px solid #e5e7eb !important;
-        }
-      `}</style>
+      <div id="qr-reader" className="rounded-lg overflow-hidden"></div>
+      <p className="text-sm text-gray-500 text-center mt-4">
+        Point your camera at the QR code on the certificate
+      </p>
     </div>
   );
 };

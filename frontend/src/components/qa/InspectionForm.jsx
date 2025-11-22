@@ -4,7 +4,7 @@ import { batchAPI, inspectionAPI, credentialAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import { 
   FiArrowLeft, FiSave, FiCheckCircle, FiXCircle, 
-  FiAward, FiPackage, FiMapPin, FiUser
+  FiAward, FiPackage, FiMapPin, FiUser, FiClipboard
 } from 'react-icons/fi';
 
 const InspectionForm = () => {
@@ -53,7 +53,8 @@ const InspectionForm = () => {
       setBatch(batchRes.data.data.batch);
 
       if (batchRes.data.data.batch.inspection) {
-        const inspRes = await inspectionAPI.getById(batchRes.data.data.batch.inspection._id || batchRes.data.data.batch.inspection);
+        const inspectionId = batchRes.data.data.batch.inspection._id || batchRes.data.data.batch.inspection;
+        const inspRes = await inspectionAPI.getById(inspectionId);
         setInspection(inspRes.data.data.inspection);
       }
     } catch (error) {
@@ -193,15 +194,15 @@ const InspectionForm = () => {
             <FiMapPin className="w-5 h-5 text-primary-600 mt-1" />
             <div>
               <p className="text-sm text-gray-500">Origin</p>
-              <p className="font-medium">{batch.origin?.state}, {batch.origin?.country}</p>
+              <p className="font-medium">{batch.origin?.state || 'N/A'}, {batch.origin?.country || 'India'}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <FiUser className="w-5 h-5 text-primary-600 mt-1" />
             <div>
               <p className="text-sm text-gray-500">Exporter</p>
-              <p className="font-medium">{batch.exporter?.name}</p>
-              <p className="text-sm text-gray-500">{batch.exporter?.organization}</p>
+              <p className="font-medium">{batch.exporter?.name || 'N/A'}</p>
+              <p className="text-sm text-gray-500">{batch.exporter?.organization || ''}</p>
             </div>
           </div>
         </div>
@@ -238,7 +239,7 @@ const InspectionForm = () => {
                     placeholder="e.g., 12.5"
                   />
                   <select
-                    value={formData.qualityParameters.moisture.acceptable}
+                    value={formData.qualityParameters.moisture.acceptable.toString()}
                     onChange={(e) => handleNestedChange('qualityParameters', 'moisture', 'acceptable', e.target.value === 'true')}
                     className="input w-32"
                   >
@@ -259,7 +260,7 @@ const InspectionForm = () => {
                     placeholder="e.g., 0.5"
                   />
                   <select
-                    value={formData.qualityParameters.foreignMatter.acceptable}
+                    value={formData.qualityParameters.foreignMatter.acceptable.toString()}
                     onChange={(e) => handleNestedChange('qualityParameters', 'foreignMatter', 'acceptable', e.target.value === 'true')}
                     className="input w-32"
                   >
@@ -280,7 +281,7 @@ const InspectionForm = () => {
                     placeholder="e.g., 5"
                   />
                   <select
-                    value={formData.qualityParameters.aflatoxin.acceptable}
+                    value={formData.qualityParameters.aflatoxin.acceptable.toString()}
                     onChange={(e) => handleNestedChange('qualityParameters', 'aflatoxin', 'acceptable', e.target.value === 'true')}
                     className="input w-32"
                   >

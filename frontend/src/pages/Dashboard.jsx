@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { batchAPI } from '../services/api';
 import { 
   FiHome, FiPackage, FiClipboard, FiAward, FiSettings, 
-  FiLogOut, FiMenu, FiX, FiLeaf, FiPlus, FiBell
+  FiLogOut, FiMenu, FiX, FiBox, FiPlus, FiBell
 } from 'react-icons/fi';
 
 // Import Dashboard Components
@@ -90,8 +90,8 @@ const Dashboard = () => {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <FiLeaf className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+              <FiBox className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg text-gray-900">CertiFarm</span>
           </Link>
@@ -103,14 +103,14 @@ const Dashboard = () => {
         {/* User Info */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-              <span className="text-primary-700 font-semibold">
-                {user?.name?.charAt(0)?.toUpperCase()}
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <span className="text-green-700 font-semibold">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ') || 'Guest'}</p>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ const Dashboard = () => {
                 className={`
                   flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
                   ${isActive 
-                    ? 'bg-primary-50 text-primary-700' 
+                    ? 'bg-green-50 text-green-700' 
                     : 'text-gray-600 hover:bg-gray-100'
                   }
                 `}
@@ -184,7 +184,7 @@ const Dashboard = () => {
             </button>
             <Link 
               to="/verify" 
-              className="hidden sm:inline-flex btn btn-outline text-sm"
+              className="hidden sm:inline-flex px-4 py-2 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 font-medium text-sm"
             >
               Verify Certificate
             </Link>

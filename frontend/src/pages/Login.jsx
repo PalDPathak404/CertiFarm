@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FiMail, FiLock, FiLogIn, FiLeaf } from 'react-icons/fi';
+import { FiMail, FiLock, FiLogIn, FiBox } from 'react-icons/fi';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -50,24 +50,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
-            <FiLeaf className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-2xl mb-4">
+            <FiBox className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">CertiFarm</h1>
           <p className="text-gray-600 mt-2">Digital Product Passport Portal</p>
         </div>
 
         {/* Login Card */}
-        <div className="card">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Sign in to your account</h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="label">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -75,7 +75,7 @@ const Login = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="input pl-10"
+                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="Enter your email"
                   required
                 />
@@ -83,7 +83,7 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="label">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -91,7 +91,7 @@ const Login = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="input pl-10"
+                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="Enter your password"
                   required
                 />
@@ -101,7 +101,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -116,7 +116,7 @@ const Login = () => {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/register" className="text-green-600 hover:text-green-700 font-medium">
                 Register here
               </Link>
             </p>
@@ -141,7 +141,7 @@ const Login = () => {
 
         {/* Verify Link */}
         <div className="mt-6 text-center">
-          <Link to="/verify" className="text-gray-600 hover:text-primary-600 text-sm">
+          <Link to="/verify" className="text-gray-600 hover:text-green-600 text-sm">
             Verify a Certificate →
           </Link>
         </div>
